@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Helia | Simulador de Financiamento de Lotes</title>
+<meta name="description" content="Simulador profissional de pagamento de lotes imobiliários para corretores.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='40' y2='40' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0' stop-color='%234338CA'/%3E%3Cstop offset='1' stop-color='%236D28D9'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='40' height='40' rx='10' fill='url(%23g)'/%3E%3Cpath d='M13 10.5V29.5M27 10.5V29.5M13 20H27' stroke='%23FFFFFF' stroke-width='3.1' stroke-linecap='round'/%3E%3Ccircle cx='20' cy='20' r='2.3' fill='%23F59E0B'/%3E%3C/svg%3E">
+<style>
+:root{
+  --navy: #1E1B3A;
+  --navy-2: #4338CA;
+  --slate: #4F46E5;
+  --bronze: #F59E0B;
+  --bronze-light: #FDE68A;
+  --cream: #F6F6FB;
+  --paper: #FFFFFF;
+  --ink: #17162B;
+  --ink-soft: #67667E;
+  --line: #E6E6F2;
+  --green: #059669;
+  --green-bg: #ECFDF5;
+  --red: #DC2626;
+  --red-bg: #FEF2F2;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(30,27,58,0.06), 0 8px 24px -12px rgba(30,27,58,0.16);
+  --shadow-lg: 0 4px 12px rgba(30,27,58,0.08), 0 20px 48px -16px rgba(30,27,58,0.26);
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--ink);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: 48px;
+}
+img,svg{display:block; max-width:100%;}
+button{font-family:inherit; cursor:pointer;}
+input,select{font-family:inherit;}
+:focus-visible{outline: 2.5px solid var(--bronze); outline-offset: 2px;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+
+.wrap{max-width: 1180px; margin: 0 auto; padding: 0 20px;}
+
+/* ---------- Header ---------- */
+header.top{
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-2) 60%, #6D28D9 100%);
+  color: #fff;
+  padding: 28px 0 34px;
+  position: relative;
+  overflow: hidden;
+}
+header.top::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image: repeating-linear-gradient(115deg, rgba(245,158,11,0.06) 0 1px, transparent 1px 64px);
+  pointer-events:none;
+}
+.top-inner{position:relative; z-index:1;}
+.brand-row{display:flex; align-items:center; gap:12px; margin-bottom:18px;}
+.brand-mark{
+  width:38px; height:38px; flex-shrink:0;
+  filter: drop-shadow(0 3px 8px rgba(0,0,0,0.28));
+}
+.brand-mark svg{display:block; width:100%; height:100%;}
+.brand-name{font-family: var(--font-display); font-size: 19px; font-weight:600; letter-spacing:0.01em;}
+.brand-tag{font-size:11px; color: var(--bronze-light); text-transform:uppercase; letter-spacing:0.14em; margin-top:1px;}
+h1.app-title{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(26px, 4.4vw, 38px);
+  line-height:1.12;
+  max-width: 620px;
+  letter-spacing: -0.01em;
+}
+p.app-sub{
+  margin-top:10px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.72);
+  max-width: 520px;
+  font-weight: 400;
+}
+
+/* ---------- Layout ---------- */
+main{margin-top: -20px; position:relative; z-index:2;}
+.grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  margin-top: 20px;
+}
+@media(min-width: 920px){
+  .grid{grid-template-columns: 380px 1fr; align-items:start;}
+  .col-form{position:sticky; top:20px;}
+}
+
+.card{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.card + .card{margin-top:18px;}
+.card-head{margin-bottom:16px;}
+.card-eyebrow{
+  font-family: var(--font-mono);
+  font-size: 10.5px; text-transform:uppercase; letter-spacing:0.12em;
+  color: var(--bronze); font-weight:600; margin-bottom:4px; display:block;
+}
+.card-title{font-family: var(--font-display); font-size:19px; font-weight:600; color:var(--navy);}
+.card-desc{font-size:13px; color:var(--ink-soft); margin-top:4px;}
+
+/* ---------- Form ---------- */
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+label{
+  display:block; font-size:12.5px; font-weight:600; color: var(--navy);
+  margin-bottom:6px;
+}
+.label-row{display:flex; align-items:center; gap:6px; margin-bottom:6px;}
+.label-row label{margin-bottom:0;}
+.info-icon{
+  width:16px; height:16px; border-radius:50%;
+  background: var(--line); color: var(--ink-soft);
+  font-size:10px; font-weight:700; font-family: var(--font-body);
+  display:inline-flex; align-items:center; justify-content:center;
+  cursor:help; position:relative; flex-shrink:0; transition: background .15s, color .15s;
+}
+.info-icon:hover, .info-icon:focus-visible{background: var(--bronze); color:#fff;}
+.info-icon[data-tooltip]:hover::after, .info-icon[data-tooltip]:focus-visible::after{
+  content: attr(data-tooltip);
+  position:absolute; bottom:135%; left:50%; transform: translateX(-18px);
+  background: var(--navy); color:#fff; font-size:11.5px; font-weight:500; font-family: var(--font-body);
+  padding:9px 11px; border-radius:9px; width:200px; max-width: 70vw; line-height:1.45; text-align:left;
+  box-shadow: var(--shadow-lg); z-index:30; white-space:normal;
+}
+.info-icon[data-tooltip]:hover::before, .info-icon[data-tooltip]:focus-visible::before{
+  content:''; position:absolute; bottom:120%; left:50%; transform: translateX(-50%);
+  border:5px solid transparent; border-top-color: var(--navy); z-index:30;
+}
+.field-hint{font-size:11.5px; color:var(--ink-soft); margin-top:5px;}
+.input-wrap{position:relative;}
+.input-affix{
+  position:absolute; top:50%; transform:translateY(-50%);
+  font-family: var(--font-mono); font-weight:600; color: var(--ink-soft);
+  font-size:15px; pointer-events:none; transition: color .15s;
+}
+.input-affix.prefix{left:14px;}
+.input-affix.suffix{right:14px; font-size:13.5px;}
+.input-wrap:focus-within .input-affix{color: var(--bronze);}
+input[type="text"], input[type="number"]{
+  width:100%;
+  border: 1.5px solid var(--line);
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+  font-size: 16px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--ink);
+  transition: border-color .15s, background .15s;
+}
+input[type="text"]:focus, input[type="number"]:focus{
+  border-color: var(--bronze);
+  background: #fff;
+}
+/* Estas duas regras precisam vir DEPOIS da regra genérica de input acima —
+   como têm a mesma especificidade, a ordem no arquivo decide quem vence. */
+input.has-prefix{padding-left:40px;}
+input.has-suffix{padding-right:38px;}
+input.err{border-color: var(--red); background: var(--red-bg);}
+.err-msg{font-size:12px; color:var(--red); margin-top:5px; display:none; font-weight:500;}
+.err-msg.show{display:block;}
+
+.ipca-toggle{
+  display:flex; background: var(--cream); border:1.5px solid var(--line); border-radius:10px; padding:3px; margin-bottom:14px;
+}
+.ipca-toggle button{
+  flex:1; border:none; background:transparent; padding:11px 8px; font-size:12.5px; font-weight:600;
+  color: var(--ink-soft); border-radius:7px; transition: all .15s; min-height:40px;
+}
+.ipca-toggle button.active{background: var(--navy); color:#fff;}
+
+.ipca-anos{display:none;}
+.ipca-anos.show{display:block;}
+.ipca-ano-row{
+  display:flex; align-items:center; gap:8px; margin-bottom:8px;
+}
+.ipca-ano-row > span{
+  font-family: var(--font-mono); font-size:12px; color: var(--ink-soft); width:40px; flex-shrink:0;
+}
+.ipca-ano-row .input-wrap{flex:1;}
+.ipca-ano-row input.has-suffix{padding:9px 30px 9px 10px; font-size:14px;}
+.ipca-ano-row .input-affix.suffix{right:10px; font-size:12px;}
+.ipca-anos-scroll{max-height:230px; overflow-y:auto; padding-right:4px; margin-top:2px;}
+@media(min-width:460px){
+  .ipca-anos-scroll{display:grid; grid-template-columns: repeat(2,1fr); gap:0 10px;}
+}
+
+.btn-primary{
+  width:100%;
+  background: linear-gradient(135deg, var(--navy), var(--navy-2));
+  color:#fff;
+  border:none;
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing:0.01em;
+  box-shadow: 0 8px 20px -8px rgba(30,27,58,0.55);
+  transition: transform .12s, box-shadow .12s;
+  margin-top: 6px;
+  min-height:52px;
+}
+.btn-primary:hover{transform: translateY(-1px); box-shadow: 0 12px 24px -8px rgba(30,27,58,0.6);}
+.btn-primary:active{transform: translateY(0);}
+
+.btn-secondary{
+  width:100%;
+  background: #fff;
+  color: var(--navy);
+  border: 1.5px solid var(--navy);
+  border-radius: var(--radius-sm);
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  min-height:46px;
+  transition: background .15s;
+}
+.btn-secondary:hover{background: var(--cream);}
+.btn-secondary.copied{background: var(--green); border-color: var(--green); color:#fff;}
+
+/* ---------- Results ---------- */
+.results-placeholder{
+  text-align:center; padding: 50px 20px; color: var(--ink-soft);
+}
+.results-placeholder .ico{font-size:34px; margin-bottom:10px;}
+.results-placeholder p{font-size:14px; max-width:280px; margin:0 auto;}
+
+.hero-results{display:none;}
+.hero-results.show{display:block;}
+
+.stat-grid{
+  display:grid; grid-template-columns: 1fr; gap:12px; margin-bottom:12px;
+}
+@media(min-width:480px){.stat-grid{grid-template-columns: repeat(3,1fr);}}
+.stat-box{
+  background: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+}
+.stat-box.highlight{background: var(--navy); border-color:var(--navy);}
+.stat-label{font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); font-weight:600;}
+.stat-box.highlight .stat-label{color: var(--bronze-light);}
+.stat-value{
+  font-family: var(--font-mono); font-size: clamp(16px,2.6vw,20px); font-weight:600; color: var(--navy); margin-top:6px;
+  white-space: nowrap;
+}
+.stat-box.highlight .stat-value{color:#fff;}
+.stat-note{font-size:10.5px; color: var(--ink-soft); margin-top:3px;}
+.stat-box.highlight .stat-note{color: rgba(255,255,255,0.6);}
+
+/* Total geral — banner de largura total, para nunca faltar espaço para o valor */
+.total-banner{
+  margin-bottom:14px;
+  background: linear-gradient(135deg, var(--navy), var(--navy-2) 75%, #6D28D9);
+  border-radius: var(--radius-sm);
+  padding: 17px 20px;
+  display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:6px 16px;
+  box-shadow: 0 8px 20px -10px rgba(30,27,58,0.55);
+}
+.total-banner-label{
+  font-size:11.5px; text-transform:uppercase; letter-spacing:0.08em; color: var(--bronze-light); font-weight:600;
+}
+.total-banner-value{
+  font-family: var(--font-display); font-size: clamp(21px, 4.2vw, 28px); font-weight:600; color:#fff;
+  white-space: nowrap; letter-spacing:-0.01em;
+}
+
+.meta-row{
+  display:flex; flex-wrap:wrap; gap: 10px 22px;
+  padding: 14px 16px; background: var(--cream); border-radius: var(--radius-sm);
+  border: 1px solid var(--line); font-size:12.5px; color: var(--ink-soft);
+}
+.meta-row b{color: var(--navy); font-family: var(--font-mono); font-weight:600;}
+
+/* ---------- Ladder chart (signature) ---------- */
+.ladder-wrap{margin-top:18px;}
+.ladder-caption{font-size:12px; color:var(--ink-soft); margin-bottom:10px;}
+.ladder{display:flex; align-items:flex-end; justify-content:center; gap:3px; height:172px; overflow-x:auto; overflow-y:visible; padding-bottom:2px; padding-top:4px;}
+.ladder-bar-col{display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:34px; position:relative; padding-top:26px; cursor:default;}
+.ladder-bar{
+  width:20px; background: linear-gradient(180deg, var(--bronze), #B45309);
+  border-radius: 3px 3px 0 0;
+  transition: height .5s cubic-bezier(.2,.8,.2,1), filter .15s;
+}
+.ladder-bar.first{background: linear-gradient(180deg, var(--slate), var(--navy));}
+.ladder-yr{font-size:9px; color: var(--ink-soft); margin-top:5px; font-family: var(--font-mono);}
+
+.ladder-bar-col:hover .ladder-bar,
+.ladder-bar-col:focus-visible .ladder-bar{filter: brightness(1.12);}
+.ladder-bar-col[data-tooltip]:hover::after,
+.ladder-bar-col[data-tooltip]:focus-visible::after{
+  content: attr(data-tooltip);
+  position:absolute; top:0; left:50%; transform:translateX(-50%);
+  background: var(--navy); color:#fff; font-family:var(--font-mono); font-weight:600;
+  font-size:11px; padding:4px 9px; border-radius:6px; white-space:nowrap;
+  box-shadow: var(--shadow); z-index:5; pointer-events:none;
+}
+.ladder-bar-col[data-tooltip]:hover::before,
+.ladder-bar-col[data-tooltip]:focus-visible::before{
+  content:''; position:absolute; top:18px; left:50%; transform:translateX(-50%);
+  border:5px solid transparent; border-top-color: var(--navy); z-index:5; pointer-events:none;
+}
+/* Colunas nas pontas: o balão centralizado normalmente estouraria para fora
+   da área visível (foi exatamente o bug do print). Aqui ele gruda na borda
+   da própria coluna em vez de tentar centralizar. */
+.ladder-bar-col.edge-start[data-tooltip]:hover::after,
+.ladder-bar-col.edge-start[data-tooltip]:focus-visible::after{ left:0; transform:none; }
+.ladder-bar-col.edge-start[data-tooltip]:hover::before,
+.ladder-bar-col.edge-start[data-tooltip]:focus-visible::before{ left:14px; transform:none; }
+.ladder-bar-col.edge-end[data-tooltip]:hover::after,
+.ladder-bar-col.edge-end[data-tooltip]:focus-visible::after{ left:auto; right:0; transform:none; }
+.ladder-bar-col.edge-end[data-tooltip]:hover::before,
+.ladder-bar-col.edge-end[data-tooltip]:focus-visible::before{ left:auto; right:14px; transform:none; }
+}
+
+/* ---------- Proposal summary ---------- */
+.proposal-box{
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--slate);
+  border-radius: var(--radius-sm);
+  padding: 6px 22px;
+}
+.proposal-row{
+  display:flex; justify-content:space-between; align-items:baseline; gap:16px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+  font-family: var(--font-body); font-size: 14px;
+}
+.proposal-row:last-of-type{border-bottom:none;}
+.proposal-label{color: var(--ink-soft); font-weight:500;}
+.proposal-value{font-family: var(--font-mono); font-weight:600; color: var(--navy); white-space:nowrap;}
+.proposal-row.is-highlight{background: var(--cream); margin:0 -22px; padding:12px 22px; border-bottom:none;}
+.proposal-row.is-highlight .proposal-value{color: var(--slate); font-size:15px;}
+.proposal-note{
+  font-size: 12.5px; color: var(--ink-soft); line-height:1.65;
+  padding: 16px 0; border-top: 1px dashed var(--line); margin-top:2px;
+}
+.proposal-total{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px 16px;
+  padding: 16px 0 18px; border-top: 2px solid var(--navy);
+}
+.proposal-total-label{font-size:12px; text-transform:uppercase; letter-spacing:0.05em; color: var(--ink-soft); font-weight:600;}
+.proposal-total-value{font-family: var(--font-display); font-size:20px; font-weight:600; color: var(--navy); white-space:nowrap;}
+
+/* ---------- Scenario table ---------- */
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+table{width:100%; border-collapse:collapse; font-size:13px; min-width:520px;}
+thead th{
+  text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:0.05em;
+  color:#fff; background: var(--navy); padding:11px 12px; font-weight:600;
+  white-space:nowrap;
+}
+thead th:first-child{border-radius:8px 0 0 0;}
+thead th:last-child{border-radius:0 8px 0 0;}
+tbody td{padding:11px 12px; border-bottom:1px solid var(--line); font-family: var(--font-mono); white-space:nowrap; color: var(--ink);}
+tbody tr:hover{background: var(--cream);}
+tbody tr:last-child td{border-bottom:none;}
+
+/* Em telas estreitas, a tabela vira uma lista de cartões — muito mais legível
+   que rolagem horizontal em um celular durante um atendimento. */
+@media(max-width:640px){
+  .table-scroll{overflow-x:visible;}
+  table{min-width:0;}
+  thead{display:none;}
+  tbody, tr, td{display:block; width:100%;}
+  tbody tr{
+    background:#fff; border:1px solid var(--line); border-radius:10px;
+    padding:4px 14px; margin-bottom:10px; box-shadow: var(--shadow);
+  }
+  tbody tr:last-child{margin-bottom:0;}
+  tbody td{
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding:9px 0; border-bottom:1px dashed var(--line); white-space:normal; text-align:right;
+  }
+  tbody td:last-child{border-bottom:none;}
+  tbody td::before{
+    content: attr(data-label);
+    font-family: var(--font-body); font-weight:600; font-size:11px; color: var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.04em; text-align:left; flex-shrink:0;
+  }
+}
+.badge-scenario{
+  display:inline-block; padding:2px 9px; border-radius:20px; font-size:10.5px; font-weight:700; font-family:var(--font-body);
+}
+.badge-cons{background:var(--green-bg); color:var(--green);}
+.badge-mod{background:#FEF3C7; color:#92400E;}
+.badge-alto{background:var(--red-bg); color:var(--red);}
+
+/* ---------- Disclaimer / footer ---------- */
+.disclaimer{
+  display:flex; gap:10px; align-items:flex-start;
+  background:#FFFBEB; border:1px solid #FDE68A; border-radius: var(--radius-sm);
+  padding:14px 16px; font-size:12.5px; color:#92400E; margin-top:20px;
+}
+.disclaimer .ico{font-size:16px; flex-shrink:0; line-height:1.4;}
+
+footer.site-foot{
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  padding: 44px 20px 18px;
+}
+.foot-divider{width:36px; height:2px; background: var(--bronze); border-radius:2px; opacity:0.55;}
+.foot-signature{display:flex; align-items:center; gap:11px;}
+.foot-monogram{
+  width:36px; height:36px; border-radius:50%;
+  background: linear-gradient(135deg, var(--navy), var(--slate));
+  color: var(--bronze-light);
+  display:flex; align-items:center; justify-content:center;
+  font-family: var(--font-display); font-weight:600; font-size:13.5px; letter-spacing:0.01em;
+  box-shadow: var(--shadow);
+  flex-shrink:0;
+}
+.foot-text{text-align:left; line-height:1.35;}
+.foot-label{font-size:9.5px; text-transform:uppercase; letter-spacing:0.13em; color:var(--ink-soft); font-weight:600;}
+.foot-name{font-family: var(--font-display); font-style: italic; font-size:15px; color:var(--navy); font-weight:500; letter-spacing:0.005em;}
+
+/* ---------- Barra de ação fixa (mobile) ---------- */
+.mobile-cta-bar{display:none;}
+
+@media(max-width: 919px){
+  .col-results{order:2;}
+  .col-form{order:1;}
+
+  body{padding-bottom: 92px;}
+  #btnCalcular{display:none;} /* substituído pela barra fixa abaixo */
+
+  .mobile-cta-bar{
+    display:block; position:fixed; left:0; right:0; bottom:0; z-index:50;
+    background: rgba(246,246,251,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -10px 24px -12px rgba(30,27,58,0.25);
+  }
+  .mobile-cta-bar .btn-primary{margin-top:0;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand-row">
+      <div class="brand-mark">
+        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Helia">
+          <defs>
+            <linearGradient id="heliaMarkGrad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#4338CA"/>
+              <stop offset="1" stop-color="#6D28D9"/>
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="10" fill="url(#heliaMarkGrad)"/>
+          <path d="M13 10.5V29.5M27 10.5V29.5M13 20H27" stroke="#FFFFFF" stroke-width="3.1" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="2.3" fill="#F59E0B"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">Helia</div>
+        <div class="brand-tag">Simulador de Lotes</div>
+      </div>
+    </div>
+    <h1 class="app-title">Simule as condições de pagamento em segundos</h1>
+    <p class="app-sub">Acompanhe a evolução estimada das parcelas ano a ano e gere uma proposta pronta para enviar ao cliente.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+
+    <!-- FORM COLUMN -->
+    <div class="col-form">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-eyebrow">Dados da simulação</span>
+          <div class="card-title">Condições do lote</div>
+        </div>
+
+        <div class="field">
+          <label for="valorLote">Valor total do lote</label>
+          <div class="input-wrap">
+            <span class="input-affix prefix">R$</span>
+            <input type="text" id="valorLote" inputmode="decimal" class="has-prefix" value="99.900,00">
+          </div>
+          <div class="err-msg" id="err-valorLote">Informe um valor de lote maior que zero.</div>
+        </div>
+
+        <div class="field">
+          <label for="valorEntrada">Valor da entrada</label>
+          <div class="input-wrap">
+            <span class="input-affix prefix">R$</span>
+            <input type="text" id="valorEntrada" inputmode="decimal" class="has-prefix" value="4.500,00">
+          </div>
+          <div class="err-msg" id="err-valorEntrada">A entrada não pode ser maior que o valor do lote nem negativa.</div>
+        </div>
+
+        <div class="field">
+          <label for="qtdParcelas">Quantidade de parcelas</label>
+          <div class="input-wrap">
+            <input type="text" id="qtdParcelas" inputmode="numeric" class="has-suffix" value="144">
+            <span class="input-affix suffix">meses</span>
+          </div>
+          <div class="err-msg" id="err-qtdParcelas">Informe uma quantidade de parcelas maior que zero.</div>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label for="taxaFixa">Reajuste anual fixo</label>
+            <span class="info-icon" tabindex="0" data-tooltip="Percentual definido em contrato, aplicado todo ano em conjunto com o IPCA. Padrão de mercado: 11,88%.">?</span>
+          </div>
+          <div class="input-wrap">
+            <input type="text" id="taxaFixa" inputmode="decimal" class="has-suffix" value="11,88">
+            <span class="input-affix suffix">%</span>
+          </div>
+          <div class="err-msg" id="err-taxaFixa">Informe uma taxa válida (0% ou maior).</div>
+        </div>
+
+        <div class="field">
+          <div class="label-row">
+            <label>IPCA anual</label>
+            <span class="info-icon" tabindex="0" data-tooltip="Índice oficial de inflação. Use uma projeção única para todos os anos, ou informe uma diferente para cada ano do contrato.">?</span>
+          </div>
+          <div class="ipca-toggle">
+            <button type="button" class="active" data-mode="fixo" id="btnModoFixo">IPCA fixo</button>
+            <button type="button" data-mode="personalizado" id="btnModoPerso">Por ano</button>
+          </div>
+
+          <div id="ipcaFixoWrap">
+            <div class="input-wrap">
+              <input type="text" id="ipcaFixo" inputmode="decimal" class="has-suffix" value="4,50">
+              <span class="input-affix suffix">%</span>
+            </div>
+            <div class="err-msg" id="err-ipcaFixo">Informe um IPCA válido (0% ou maior).</div>
+          </div>
+
+          <div id="ipcaAnosWrap" class="ipca-anos">
+            <div class="field-hint" style="margin-bottom:8px;">Deixe em branco para usar o IPCA fixo naquele ano.</div>
+            <div class="ipca-anos-scroll" id="ipcaAnosScroll"></div>
+          </div>
+        </div>
+
+        <button class="btn-primary" id="btnCalcular">Calcular simulação</button>
+      </div>
+    </div>
+
+    <!-- RESULTS COLUMN -->
+    <div class="col-results">
+
+      <div class="card" id="resultsCard">
+        <div id="resultsPlaceholder" class="results-placeholder">
+          <div class="ico">🧮</div>
+          <p>Preencha os dados ao lado e clique em <b>Calcular simulação</b> para ver o resultado completo.</p>
+        </div>
+
+        <div id="heroResults" class="hero-results">
+          <div class="card-head">
+            <span class="card-eyebrow">Resultado da simulação</span>
+            <div class="card-title">Resumo financeiro</div>
+          </div>
+
+          <div class="total-banner">
+            <span class="total-banner-label">Total estimado a pagar</span>
+            <span class="total-banner-value" id="resTotal">—</span>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-box">
+              <div class="stat-label">Entrada</div>
+              <div class="stat-value" id="resEntrada">—</div>
+            </div>
+            <div class="stat-box highlight">
+              <div class="stat-label">1ª parcela mensal</div>
+              <div class="stat-value" id="resPrimeiraParcela">—</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Última parcela (est.)</div>
+              <div class="stat-value" id="resUltimaParcela">—</div>
+              <div class="stat-note" id="resUltimaParcelaNota"></div>
+            </div>
+          </div>
+
+          <div class="meta-row">
+            <div>Saldo financiado: <b id="metaSaldo">—</b></div>
+            <div>Parcelas: <b id="metaParcelas">—</b></div>
+            <div>Reajuste fixo: <b id="metaReajuste">—</b></div>
+            <div>IPCA base: <b id="metaIpca">—</b></div>
+            <div>Prazo: <b id="metaPrazo">—</b></div>
+          </div>
+
+          <div class="ladder-wrap">
+            <div class="ladder-caption">Evolução da parcela mensal por ano de contrato</div>
+            <div class="ladder" id="ladderChart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="proposalCard" style="display:none;">
+        <div class="card-head">
+          <span class="card-eyebrow">Para enviar ao cliente</span>
+          <div class="card-title">Resumo da proposta</div>
+        </div>
+        <div class="proposal-box" id="proposalText"></div>
+        <button class="btn-secondary" id="btnCopiar" style="margin-top:14px;">Copiar resumo</button>
+      </div>
+
+      <div class="card" id="scenarioCard" style="display:none;">
+        <div class="card-head">
+          <span class="card-eyebrow">Comparativo</span>
+          <div class="card-title">Cenários de IPCA</div>
+          <div class="card-desc">Como a inflação projetada altera a parcela e o total pago.</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Cenário</th>
+                <th>IPCA</th>
+                <th>Parcela inicial</th>
+                <th>Parcela último ano</th>
+                <th>Total estimado</th>
+              </tr>
+            </thead>
+            <tbody id="scenarioBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" id="tableCard" style="display:none;">
+        <div class="card-head">
+          <span class="card-eyebrow">Detalhamento</span>
+          <div class="card-title">Evolução anual das parcelas</div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Ano</th>
+                <th>Período</th>
+                <th>Parcelas</th>
+                <th>Valor mensal</th>
+                <th>IPCA aplicado</th>
+                <th>Reajuste total</th>
+                <th>Total no ano</th>
+              </tr>
+            </thead>
+            <tbody id="evolutionBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="disclaimer" id="disclaimerBox" style="display:none;">
+        <div class="ico">⚠️</div>
+        <div>Os valores apresentados são estimativas. O valor real das parcelas dependerá do IPCA efetivamente aplicado conforme as condições previstas em contrato.</div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<footer class="site-foot">
+  <div class="foot-divider"></div>
+  <div class="foot-signature">
+    <div class="foot-monogram">DA</div>
+    <div class="foot-text">
+      <div class="foot-label">Desenvolvido por</div>
+      <div class="foot-name">Danilo Almeida</div>
+    </div>
+  </div>
+</footer>
+
+<div class="mobile-cta-bar" id="mobileCtaBar">
+  <button class="btn-primary" id="btnCalcularMobile">Calcular simulação</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     1. UTILITÁRIOS DE FORMATAÇÃO / PARSE (padrão brasileiro)
+     ========================================================= */
+
+  function parseCurrencyBRL(str){
+    if(typeof str !== 'string') return NaN;
+    const cleaned = str.replace(/[R$\s]/g,'').replace(/\./g,'').replace(',', '.');
+    const val = parseFloat(cleaned);
+    return isNaN(val) ? NaN : val;
+  }
+
+  function formatCurrencyBRL(num){
+    if(!isFinite(num)) return 'R$\u00A00,00';
+    return 'R$\u00A0' + num.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function formatNumberBR(num){
+    if(!isFinite(num)) return '0,00';
+    return num.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+
+  function parsePercentBR(str){
+    if(typeof str !== 'string' || str.trim()==='') return NaN;
+    const cleaned = str.replace('%','').replace(/\s/g,'').replace(',', '.');
+    const val = parseFloat(cleaned);
+    return isNaN(val) ? NaN : val / 100;
+  }
+
+  function formatPercentBR(decimalVal, digits){
+    digits = digits === undefined ? 2 : digits;
+    if(!isFinite(decimalVal)) return '0%';
+    return (decimalVal*100).toLocaleString('pt-BR',{minimumFractionDigits:digits, maximumFractionDigits:digits}) + '%';
+  }
+
+  /* Máscara monetária "ao vivo": cada dígito digitado empurra os centavos,
+     como em apps bancários. O R$ fica fixo fora do campo (ver .input-affix),
+     então o usuário nunca precisa digitar ou apagar o símbolo. */
+  function attachLiveCurrencyMask(el){
+    el.addEventListener('input', function(){
+      let digits = el.value.replace(/\D/g,'').replace(/^0+(?=\d)/,'');
+      if(!digits){ el.value=''; return; }
+      const num = parseInt(digits,10) / 100;
+      el.value = formatNumberBR(num);
+    });
+    el.addEventListener('focus', function(){ el.select(); });
+  }
+
+  /* Percentual: aceita apenas dígitos e uma vírgula enquanto digita
+     (o "%" fica fixo fora do campo) e arredonda para 2 casas ao sair. */
+  function attachPercentTypingFilter(el){
+    el.addEventListener('input', function(){
+      let v = el.value.replace(/[^\d,]/g,'');
+      const parts = v.split(',');
+      if(parts.length > 2) v = parts[0] + ',' + parts.slice(1).join('');
+      el.value = v;
+    });
+    el.addEventListener('blur', function(){
+      if(el.value.trim()==='') return;
+      const v = parsePercentBR(el.value);
+      if(!isNaN(v)) el.value = formatNumberBR(v*100);
+    });
+    el.addEventListener('focus', function(){ el.select(); });
+  }
+
+  function attachIntegerTypingFilter(el){
+    el.addEventListener('input', function(){
+      el.value = el.value.replace(/\D/g,'');
+    });
+    el.addEventListener('focus', function(){ el.select(); });
+  }
+
+  /* =========================================================
+     2. NÚCLEO DE CÁLCULO FINANCEIRO
+     (isolado da interface — pode ser reaproveitado/testado)
+     ========================================================= */
+
+  const DEFAULTS = {
+    valorLote: 99900,
+    valorEntrada: 4500,
+    qtdParcelas: 144,
+    taxaFixaAnual: 0.1188,
+    ipcaFixo: 0.045
+  };
+
+  /**
+   * Calcula a simulação completa de financiamento de lote.
+   * Regra: a partir do 2º ano, cada parcela é reajustada por
+   * (taxaFixaAnual + IPCA do respectivo ano), de forma cumulativa.
+   * O IPCA "do Ano N" representa a inflação acumulada durante o
+   * Ano N, aplicada no reajuste que inicia o Ano N+1.
+   */
+  function simularFinanciamento(params){
+    const {
+      valorLote, valorEntrada, qtdParcelas, taxaFixaAnual,
+      ipcaModo, ipcaFixo, ipcaPorAno
+    } = params;
+
+    const saldoFinanciado = valorLote - valorEntrada;
+    const parcelaInicial = saldoFinanciado / qtdParcelas;
+    const totalAnos = Math.ceil(qtdParcelas / 12);
+
+    const periodos = [];
+    let parcelaAtual = parcelaInicial;
+    let totalParcelasPago = 0;
+
+    for(let y = 0; y < totalAnos; y++){
+      const mesInicio = y*12 + 1;
+      const mesesRestantes = qtdParcelas - y*12;
+      const qtdMesesPeriodo = Math.min(12, mesesRestantes);
+      const mesFim = mesInicio + qtdMesesPeriodo - 1;
+
+      let ipcaAplicado = null;
+      let reajusteTotal = null;
+
+      if(y > 0){
+        ipcaAplicado = (ipcaModo === 'fixo')
+          ? ipcaFixo
+          : (ipcaPorAno[y-1] !== undefined && ipcaPorAno[y-1] !== null ? ipcaPorAno[y-1] : ipcaFixo);
+        reajusteTotal = taxaFixaAnual + ipcaAplicado;
+        parcelaAtual = parcelaAtual * (1 + reajusteTotal);
+      }
+
+      const totalPeriodo = parcelaAtual * qtdMesesPeriodo;
+      totalParcelasPago += totalPeriodo;
+
+      periodos.push({
+        ano: y+1, mesInicio, mesFim, qtdMesesPeriodo,
+        parcelaMensal: parcelaAtual,
+        ipcaAplicado, reajusteTotal, totalPeriodo
+      });
+    }
+
+    return {
+      saldoFinanciado,
+      parcelaInicial,
+      periodos,
+      totalParcelasPago,
+      totalGeral: valorEntrada + totalParcelasPago,
+      parcelaUltimoAno: parcelaAtual,
+      totalAnos,
+      valorLote, valorEntrada, qtdParcelas, taxaFixaAnual
+    };
+  }
+
+  /* =========================================================
+     3. ELEMENTOS DA INTERFACE
+     ========================================================= */
+
+  const els = {
+    valorLote: document.getElementById('valorLote'),
+    valorEntrada: document.getElementById('valorEntrada'),
+    qtdParcelas: document.getElementById('qtdParcelas'),
+    taxaFixa: document.getElementById('taxaFixa'),
+    ipcaFixo: document.getElementById('ipcaFixo'),
+    btnModoFixo: document.getElementById('btnModoFixo'),
+    btnModoPerso: document.getElementById('btnModoPerso'),
+    ipcaFixoWrap: document.getElementById('ipcaFixoWrap'),
+    ipcaAnosWrap: document.getElementById('ipcaAnosWrap'),
+    ipcaAnosScroll: document.getElementById('ipcaAnosScroll'),
+    btnCalcular: document.getElementById('btnCalcular'),
+    resultsPlaceholder: document.getElementById('resultsPlaceholder'),
+    heroResults: document.getElementById('heroResults'),
+    proposalCard: document.getElementById('proposalCard'),
+    scenarioCard: document.getElementById('scenarioCard'),
+    tableCard: document.getElementById('tableCard'),
+    disclaimerBox: document.getElementById('disclaimerBox')
+  };
+
+  [els.valorLote, els.valorEntrada].forEach(attachLiveCurrencyMask);
+  [els.taxaFixa, els.ipcaFixo].forEach(attachPercentTypingFilter);
+  attachIntegerTypingFilter(els.qtdParcelas);
+
+  let ipcaModoAtual = 'fixo';
+
+  els.btnModoFixo.addEventListener('click', function(){
+    ipcaModoAtual = 'fixo';
+    els.btnModoFixo.classList.add('active');
+    els.btnModoPerso.classList.remove('active');
+    els.ipcaFixoWrap.style.display = 'block';
+    els.ipcaAnosWrap.classList.remove('show');
+  });
+  els.btnModoPerso.addEventListener('click', function(){
+    ipcaModoAtual = 'personalizado';
+    els.btnModoPerso.classList.add('active');
+    els.btnModoFixo.classList.remove('active');
+    els.ipcaFixoWrap.style.display = 'none';
+    els.ipcaAnosWrap.classList.add('show');
+    renderIpcaAnosInputs();
+  });
+
+  function renderIpcaAnosInputs(){
+    const qtdParcelas = parseInt((els.qtdParcelas.value||'0').replace(/\D/g,''),10) || 0;
+    const totalAnos = Math.max(1, Math.ceil(qtdParcelas/12));
+    // preserva valores já digitados
+    const existentes = {};
+    els.ipcaAnosScroll.querySelectorAll('input').forEach(inp=>{
+      existentes[inp.dataset.ano] = inp.value;
+    });
+    let html = '';
+    for(let a=1; a<totalAnos; a++){ // ano N determina reajuste do ano N+1; último ano não precisa
+      const val = existentes[a] !== undefined ? existentes[a] : '';
+      html += '<div class="ipca-ano-row"><span>Ano '+a+'</span>'+
+              '<div class="input-wrap"><input type="text" data-ano="'+a+'" inputmode="decimal" class="has-suffix" placeholder="IPCA fixo" value="'+val+'"><span class="input-affix suffix">%</span></div></div>';
+    }
+    els.ipcaAnosScroll.innerHTML = html || '<div class="field-hint">Aumente a quantidade de parcelas para liberar mais anos.</div>';
+    els.ipcaAnosScroll.querySelectorAll('input').forEach(attachPercentTypingFilter);
+  }
+  els.qtdParcelas.addEventListener('blur', function(){
+    if(ipcaModoAtual === 'personalizado') renderIpcaAnosInputs();
+  });
+
+  /* =========================================================
+     4. VALIDAÇÃO + LEITURA DOS CAMPOS
+     ========================================================= */
+
+  function clearErrors(){
+    document.querySelectorAll('.err-msg').forEach(e=>e.classList.remove('show'));
+    document.querySelectorAll('input').forEach(i=>i.classList.remove('err'));
+  }
+  function setError(fieldEl, errId){
+    fieldEl.classList.add('err');
+    const err = document.getElementById(errId);
+    if(err) err.classList.add('show');
+  }
+
+  function lerEValidar(){
+    clearErrors();
+    let valid = true;
+
+    const valorLote = parseCurrencyBRL(els.valorLote.value);
+    const valorEntrada = parseCurrencyBRL(els.valorEntrada.value);
+    const qtdParcelas = parseInt((els.qtdParcelas.value||'').replace(/\D/g,''),10);
+    const taxaFixaAnual = parsePercentBR(els.taxaFixa.value);
+    const ipcaFixo = parsePercentBR(els.ipcaFixo.value);
+
+    if(isNaN(valorLote) || valorLote <= 0){ setError(els.valorLote,'err-valorLote'); valid=false; }
+    if(isNaN(valorEntrada) || valorEntrada < 0 || (valorLote>0 && valorEntrada > valorLote)){ setError(els.valorEntrada,'err-valorEntrada'); valid=false; }
+    if(!qtdParcelas || qtdParcelas <= 0){ setError(els.qtdParcelas,'err-qtdParcelas'); valid=false; }
+    if(isNaN(taxaFixaAnual) || taxaFixaAnual < 0){ setError(els.taxaFixa,'err-taxaFixa'); valid=false; }
+    if(isNaN(ipcaFixo) || ipcaFixo < 0){ setError(els.ipcaFixo,'err-ipcaFixo'); valid=false; }
+
+    if(!valid) return null;
+
+    let ipcaPorAno = [];
+    if(ipcaModoAtual === 'personalizado'){
+      const inputs = els.ipcaAnosScroll.querySelectorAll('input');
+      inputs.forEach(inp=>{
+        const idx = parseInt(inp.dataset.ano,10) - 1;
+        const v = inp.value.trim()==='' ? null : parsePercentBR(inp.value);
+        ipcaPorAno[idx] = (v===null || isNaN(v)) ? null : v;
+      });
+    }
+
+    return {
+      valorLote, valorEntrada, qtdParcelas, taxaFixaAnual,
+      ipcaModo: ipcaModoAtual, ipcaFixo, ipcaPorAno
+    };
+  }
+
+  /* =========================================================
+     5. RENDERIZAÇÃO DOS RESULTADOS
+     ========================================================= */
+
+  let ultimaSimulacao = null;
+
+  function formatarPrazo(qtdParcelas){
+    const anos = Math.floor(qtdParcelas/12);
+    const meses = qtdParcelas % 12;
+    let out = [];
+    if(anos>0) out.push(anos + (anos===1?' ano':' anos'));
+    if(meses>0) out.push(meses + (meses===1?' mês':' meses'));
+    return out.join(' e ') || '0 meses';
+  }
+
+  function renderResultados(sim){
+    document.getElementById('resEntrada').textContent = formatCurrencyBRL(sim.valorEntrada);
+    document.getElementById('resPrimeiraParcela').textContent = formatCurrencyBRL(sim.parcelaInicial);
+    document.getElementById('resUltimaParcela').textContent = formatCurrencyBRL(sim.parcelaUltimoAno);
+    document.getElementById('resUltimaParcelaNota').textContent = 'Ano ' + sim.totalAnos;
+    document.getElementById('resTotal').textContent = formatCurrencyBRL(sim.totalGeral);
+
+    document.getElementById('metaSaldo').textContent = formatCurrencyBRL(sim.saldoFinanciado);
+    document.getElementById('metaParcelas').textContent = sim.qtdParcelas + 'x';
+    document.getElementById('metaReajuste').textContent = formatPercentBR(sim.taxaFixaAnual);
+    document.getElementById('metaIpca').textContent = (ipcaModoAtual==='fixo') ? formatPercentBR(parsePercentBR(els.ipcaFixo.value)) : 'personalizado por ano';
+    document.getElementById('metaPrazo').textContent = formatarPrazo(sim.qtdParcelas);
+
+    // Ladder chart
+    const maxParcela = Math.max(...sim.periodos.map(p=>p.parcelaMensal));
+    const ladder = document.getElementById('ladderChart');
+    ladder.innerHTML = '';
+    sim.periodos.forEach((p, i)=>{
+      const col = document.createElement('div');
+      col.className = 'ladder-bar-col';
+      if(i === 0) col.classList.add('edge-start');
+      if(i === sim.periodos.length - 1) col.classList.add('edge-end');
+      col.setAttribute('tabindex', '0');
+      col.setAttribute('data-tooltip', formatCurrencyBRL(p.parcelaMensal) + ' · Ano ' + p.ano);
+      const bar = document.createElement('div');
+      bar.className = 'ladder-bar' + (i===0 ? ' first' : '');
+      const pct = Math.max(6, Math.round((p.parcelaMensal / maxParcela) * 118));
+      bar.style.height = '0px';
+      col.appendChild(bar);
+      const lbl = document.createElement('div');
+      lbl.className = 'ladder-yr';
+      lbl.textContent = 'A' + p.ano;
+      col.appendChild(lbl);
+      ladder.appendChild(col);
+      requestAnimationFrame(()=>{ setTimeout(()=>{ bar.style.height = pct + 'px'; }, i*35); });
+    });
+
+    document.getElementById('resultsPlaceholder').style.display = 'none';
+    document.getElementById('heroResults').classList.add('show');
+  }
+
+  let propostaTextoAtual = '';
+
+  function renderProposta(sim){
+    const ipcaLabel = (ipcaModoAtual==='fixo')
+      ? formatPercentBR(parsePercentBR(els.ipcaFixo.value))
+      : 'variável por ano (conforme projeção informada)';
+
+    // Texto simples — é o que vai para o botão "Copiar resumo" (WhatsApp etc.)
+    propostaTextoAtual =
+`Valor do lote: ${formatCurrencyBRL(sim.valorLote)}
+Entrada: ${formatCurrencyBRL(sim.valorEntrada)}
+Parcelamento: ${sim.qtdParcelas} meses
+Parcela inicial: ${formatCurrencyBRL(sim.parcelaInicial)}
+
+As parcelas serão reajustadas anualmente conforme a regra contratual de ${formatPercentBR(sim.taxaFixaAnual)} + IPCA (${ipcaLabel}).
+
+Total estimado do investimento: ${formatCurrencyBRL(sim.totalGeral)}.`;
+
+    // Versão visual, estruturada em card — o que aparece na tela
+    const html =
+      '<div class="proposal-row"><span class="proposal-label">Valor do lote</span><span class="proposal-value">'+formatCurrencyBRL(sim.valorLote)+'</span></div>'+
+      '<div class="proposal-row"><span class="proposal-label">Entrada</span><span class="proposal-value">'+formatCurrencyBRL(sim.valorEntrada)+'</span></div>'+
+      '<div class="proposal-row"><span class="proposal-label">Parcelamento</span><span class="proposal-value">'+sim.qtdParcelas+' meses</span></div>'+
+      '<div class="proposal-row is-highlight"><span class="proposal-label">Parcela inicial</span><span class="proposal-value">'+formatCurrencyBRL(sim.parcelaInicial)+'</span></div>'+
+      '<p class="proposal-note">As parcelas serão reajustadas anualmente conforme a regra contratual de <b>'+formatPercentBR(sim.taxaFixaAnual)+' + IPCA</b> ('+ipcaLabel+').</p>'+
+      '<div class="proposal-total"><span class="proposal-total-label">Total estimado do investimento</span><span class="proposal-total-value">'+formatCurrencyBRL(sim.totalGeral)+'</span></div>';
+
+    document.getElementById('proposalText').innerHTML = html;
+    document.getElementById('proposalCard').style.display = 'block';
+  }
+
+  function renderCenarios(base){
+    const cenarios = [
+      {nome:'Conservador', ipca:0.03, badge:'badge-cons'},
+      {nome:'Moderado', ipca:0.045, badge:'badge-mod'},
+      {nome:'Alto', ipca:0.06, badge:'badge-alto'}
+    ];
+    const body = document.getElementById('scenarioBody');
+    body.innerHTML = '';
+    cenarios.forEach(c=>{
+      const sim = simularFinanciamento({
+        valorLote: base.valorLote, valorEntrada: base.valorEntrada,
+        qtdParcelas: base.qtdParcelas, taxaFixaAnual: base.taxaFixaAnual,
+        ipcaModo:'fixo', ipcaFixo: c.ipca, ipcaPorAno:[]
+      });
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td data-label="Cenário"><span class="badge-scenario '+c.badge+'">'+c.nome+'</span></td>'+
+        '<td data-label="IPCA">'+formatPercentBR(c.ipca,2)+'</td>'+
+        '<td data-label="Parcela inicial">'+formatCurrencyBRL(sim.parcelaInicial)+'</td>'+
+        '<td data-label="Parcela último ano">'+formatCurrencyBRL(sim.parcelaUltimoAno)+'</td>'+
+        '<td data-label="Total estimado">'+formatCurrencyBRL(sim.totalGeral)+'</td>';
+      body.appendChild(tr);
+    });
+    document.getElementById('scenarioCard').style.display = 'block';
+  }
+
+  function renderTabelaEvolucao(sim){
+    const body = document.getElementById('evolutionBody');
+    body.innerHTML = '';
+    sim.periodos.forEach(p=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td data-label="Ano">Ano '+p.ano+'</td>'+
+        '<td data-label="Período">Meses '+p.mesInicio+' a '+p.mesFim+'</td>'+
+        '<td data-label="Parcelas">'+p.qtdMesesPeriodo+'</td>'+
+        '<td data-label="Valor mensal">'+formatCurrencyBRL(p.parcelaMensal)+'</td>'+
+        '<td data-label="IPCA aplicado">'+(p.ipcaAplicado===null? '—' : formatPercentBR(p.ipcaAplicado))+'</td>'+
+        '<td data-label="Reajuste total">'+(p.reajusteTotal===null? '—' : formatPercentBR(p.reajusteTotal))+'</td>'+
+        '<td data-label="Total no ano">'+formatCurrencyBRL(p.totalPeriodo)+'</td>';
+      body.appendChild(tr);
+    });
+    document.getElementById('tableCard').style.display = 'block';
+  }
+
+  /* =========================================================
+     6. AÇÃO PRINCIPAL
+     ========================================================= */
+
+  function calcular(){
+    const params = lerEValidar();
+    if(!params) return;
+
+    const sim = simularFinanciamento(params);
+    ultimaSimulacao = sim;
+
+    renderResultados(sim);
+    renderProposta(sim);
+    renderCenarios(params);
+    renderTabelaEvolucao(sim);
+    document.getElementById('disclaimerBox').style.display = 'flex';
+
+    if(window.innerWidth < 920){
+      document.getElementById('resultsCard').scrollIntoView({behavior:'smooth', block:'start'});
+    }
+  }
+
+  els.btnCalcular.addEventListener('click', calcular);
+  const btnCalcularMobile = document.getElementById('btnCalcularMobile');
+  if(btnCalcularMobile) btnCalcularMobile.addEventListener('click', calcular);
+
+  document.getElementById('btnCopiar').addEventListener('click', function(){
+    const texto = propostaTextoAtual;
+    const btn = this;
+    function ok(){
+      const original = 'Copiar resumo';
+      btn.textContent = 'Copiado ✓';
+      btn.classList.add('copied');
+      setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1800);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(ok).catch(()=>{ fallbackCopy(texto, ok); });
+    } else {
+      fallbackCopy(texto, ok);
+    }
+  });
+
+  function fallbackCopy(text, cb){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); cb(); }catch(e){}
+    document.body.removeChild(ta);
+  }
+
+  /* =========================================================
+     7. TESTE INTERNO (executa uma vez, silencioso no console)
+     Cenário obrigatório: lote 99.900 / entrada 4.500 / 144x /
+     11,88% + IPCA 4,5%  →  saldo 95.400, parcela inicial 662,50,
+     parcela 2º ano ≈ 771,02
+     ========================================================= */
+  (function autoTeste(){
+    const t = simularFinanciamento({
+      valorLote: 99900, valorEntrada: 4500, qtdParcelas: 144,
+      taxaFixaAnual: 0.1188, ipcaModo:'fixo', ipcaFixo: 0.045, ipcaPorAno:[]
+    });
+    console.assert(Math.abs(t.saldoFinanciado - 95400) < 0.01, 'Falha: saldo financiado');
+    console.assert(Math.abs(t.parcelaInicial - 662.50) < 0.01, 'Falha: parcela inicial');
+    console.assert(Math.abs(t.periodos[1].parcelaMensal - 771.02) < 0.05, 'Falha: parcela 2º ano');
+  })();
+
+  // Inicializa lista de anos do IPCA personalizado
+  renderIpcaAnosInputs();
+
+})();
+</script>
+</body>
+</html>
